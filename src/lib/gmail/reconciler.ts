@@ -208,10 +208,11 @@ export async function reconcilePipelineWithMail(userId: string, force = false): 
     if (refreshToken && process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
       providerUsed = "gmail_api";
       try {
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://jobseek.khawarahemad.com";
         const oauth2Client = new google.auth.OAuth2(
           process.env.GOOGLE_CLIENT_ID,
           process.env.GOOGLE_CLIENT_SECRET,
-          "http://localhost:3000/api/auth/callback"
+          `${appUrl}/api/auth/callback`
         );
         oauth2Client.setCredentials({ refresh_token: refreshToken });
         const gmail = google.gmail({ version: "v1", auth: oauth2Client });

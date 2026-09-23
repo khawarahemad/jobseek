@@ -12,10 +12,11 @@ export async function GET(request: Request) {
   }
 
   try {
+    const url = new URL(request.url);
     const oauth2Client = new google.auth.OAuth2(
       process.env.GOOGLE_CLIENT_ID,
       process.env.GOOGLE_CLIENT_SECRET,
-      'http://localhost:3000/api/auth/callback'
+      `${url.origin}/api/auth/callback`
     );
 
     const { tokens } = await oauth2Client.getToken(code);
@@ -39,9 +40,9 @@ export async function GET(request: Request) {
     }
 
     // Redirect back to settings page with success
-    return NextResponse.redirect('http://localhost:3000/settings?oauth=success');
+    return NextResponse.redirect(`${new URL(request.url).origin}/settings?oauth=success`);
   } catch (error) {
     console.error('OAuth Callback Error:', error);
-    return NextResponse.redirect('http://localhost:3000/settings?oauth=error');
+    return NextResponse.redirect(`${new URL(request.url).origin}/settings?oauth=error`);
   }
 }
