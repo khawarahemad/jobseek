@@ -55,8 +55,8 @@ async function resolveResumeAttachment(
   const localPath =
     process.env.LOCAL_RESUME_PATH ||
     "/Users/khawarahemad/Downloads/Khawar_Ahemad_Khan_Resume.pdf";
-  if (fs.existsSync(localPath)) {
-    const buffer = fs.readFileSync(localPath);
+  if (fs.existsSync(/*turbopackIgnore: true*/ localPath)) {
+    const buffer = fs.readFileSync(/*turbopackIgnore: true*/ localPath);
     const filename = localPath.split("/").pop() || "resume.pdf";
     console.log(`[Resume] Loaded from local path: ${localPath}`);
     return { buffer, filename };
