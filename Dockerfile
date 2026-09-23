@@ -50,5 +50,8 @@ EXPOSE 3000
 
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
+ENV AUTH_URL="https://jobseek.khawarahemad.com"
+ENV NEXTAUTH_URL="https://jobseek.khawarahemad.com"
+ENV AUTH_TRUST_HOST="true"
 
 CMD ["node", "server.js"]
