@@ -12,11 +12,11 @@ export async function GET(request: Request) {
   }
 
   try {
-    const url = new URL(request.url);
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://jobseek.khawarahemad.com";
     const oauth2Client = new google.auth.OAuth2(
       process.env.GOOGLE_CLIENT_ID,
       process.env.GOOGLE_CLIENT_SECRET,
-      `${url.origin}/api/auth/callback`
+      `${appUrl}/api/auth/callback`
     );
 
     const { tokens } = await oauth2Client.getToken(code);
@@ -40,9 +40,11 @@ export async function GET(request: Request) {
     }
 
     // Redirect back to settings page with success
-    return NextResponse.redirect(`${new URL(request.url).origin}/settings?oauth=success`);
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://jobseek.khawarahemad.com";
+    return NextResponse.redirect(`${appUrl}/settings?oauth=success`);
   } catch (error) {
     console.error('OAuth Callback Error:', error);
-    return NextResponse.redirect(`${new URL(request.url).origin}/settings?oauth=error`);
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://jobseek.khawarahemad.com";
+    return NextResponse.redirect(`${appUrl}/settings?oauth=error`);
   }
 }
