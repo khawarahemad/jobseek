@@ -40,11 +40,10 @@ export async function GET(request: Request) {
     }
 
     // Redirect back to settings page with success
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://jobseek.khawarahemad.com";
     return NextResponse.redirect(`${appUrl}/settings?oauth=success`);
   } catch (error) {
     console.error('OAuth Callback Error:', error);
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://jobseek.khawarahemad.com";
-    return NextResponse.redirect(`${appUrl}/settings?oauth=error`);
+    const fallbackAppUrl = process.env.NEXT_PUBLIC_APP_URL || "https://jobseek.khawarahemad.com";
+    return NextResponse.redirect(`${fallbackAppUrl}/settings?oauth=error`);
   }
 }
