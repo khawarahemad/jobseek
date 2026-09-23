@@ -1,6 +1,5 @@
 import { google } from "googleapis";
 import nodemailer from "nodemailer";
-import fs from "fs";
 import { prisma } from "@/lib/prisma";
 import { downloadResumeFromS3, getResumeS3Key } from "@/lib/s3";
 
@@ -48,18 +47,7 @@ async function resolveResumeAttachment(
       return { buffer, filename };
     }
   } catch (s3Err) {
-    console.warn("[Resume] S3 fetch failed, falling back to local:", s3Err);
-  }
-
-  // 2. Local file fallback
-  const localPath =
-    process.env.LOCAL_RESUME_PATH ||
-    "/Users/khawarahemad/Downloads/Khawar_Ahemad_Khan_Resume.pdf";
-  if (fs.existsSync(/*turbopackIgnore: true*/ localPath)) {
-    const buffer = fs.readFileSync(/*turbopackIgnore: true*/ localPath);
-    const filename = localPath.split("/").pop() || "resume.pdf";
-    console.log(`[Resume] Loaded from local path: ${localPath}`);
-    return { buffer, filename };
+    console.warn("[Resume] S3 fetch failed:", s3Err);
   }
 
   return null;
