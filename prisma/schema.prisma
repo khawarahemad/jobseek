@@ -1,0 +1,148 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id               String            @id @default(cuid())
+  name             String?
+  email            String?           @unique
+  emailVerified    DateTime?
+  image            String?
+  accounts         Account[]
+  sessions         Session[]
+  jobs             Job[]
+  templates        Template[]
+  candidateProfile CandidateProfile?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+}
+
+model CandidateProfile {
+  id                 String   @id @default(cuid())
+  userId             String   @unique
+  fullName           String?
+  headline           String?
+  email              String?
+  phone              String?
+  githubUrl          String?
+  portfolioUrl       String?
+  rawResumeText      String?  @db.Text
+  resumeS3Key        String?  // S3 key: resumes/<userId>/resume.pdf
+  resumeFilename     String?  // Original filename shown in email attachment
+  skills             String[]
+  keyProjects        Json?    // Array of { name, description, tech }
+  targetRoles        String[]
+  preferredLocations String[]
+  remotePreference   String?  @default("Remote") // Remote, Hybrid, Onsite, Any
+  targetIndustries   String[]
+  seniorityLevel     String?  @default("Junior / Mid")
+  customBio          String?  @db.Text
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Account {
+  id                String   @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?  @db.Text
+  access_token      String?  @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?  @db.Text
+  session_state     String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Job {
+  id               String        @id @default(uuid())
+  userId           String
+  company          String
+  title            String
+  url              String?
+  hrEmail          String?
+  hrName           String?
+  hrContacts       Json?         // Array of { name, email, role, confidence }
+  matchScore       Int?
+  status           String        @default("SOURCED") // SOURCED, EMAILED, REPLIED, INTERVIEWING, REJECTED, BOUNCED
+  bouncedAt        DateTime?
+  customContext    String?       @db.Text
+  researchedInfo   String?       @db.Text
+  generatedSubject String?
+  generatedBody    String?       @db.Text
+  lastReplySnippet String?       @db.Text
+  lastReplyFrom    String?
+  lastReplySubject String?
+  lastReplyAt      DateTime?
+  suggestedAiReply String?       @db.Text
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  outreachLogs OutreachLog[]
+
+  @@index([userId, status])
+}
+
+model Template {
+  id        String   @id @default(uuid())
+  userId    String
+  name      String
+  category  String?
+  subject   String
+  body      String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model OutreachLog {
+  id           String   @id @default(uuid())
+  jobId        String
+  threadId     String?
+  messageId    String?
+  sentTo       String?
+  subject      String?
+  bodySnippet  String?  @db.Text
+  status       String   @default("SENT") // SENT, DELIVERED, BOUNCED, REPLIED
+  bounceReason String?
+  sentAt       DateTime @default(now())
+
+  job Job @relation(fields: [jobId], references: [id], onDelete: Cascade)
+}
