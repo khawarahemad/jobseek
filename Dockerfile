@@ -55,3 +55,4 @@ ENV NEXTAUTH_URL="https://jobseek.khawarahemad.com"
 ENV AUTH_TRUST_HOST="true"
 
 CMD ["node", "server.js"]
+

@@ -146,4 +146,16 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   },
   secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET,
   trustHost: true,
+  debug: true,
+  logger: {
+    error(code, ...message) {
+      console.error("[Auth.js ERROR]", code, ...message);
+    },
+    warn(code, ...message) {
+      console.warn("[Auth.js WARN]", code, ...message);
+    },
+    debug(code, ...message) {
+      console.log("[Auth.js DEBUG]", code, ...message);
+    },
+  },
 });

@@ -26,10 +26,23 @@ function fixRequest(req: NextRequest): NextRequest {
 }
 
 export async function GET(req: NextRequest) {
-  return handlers.GET(fixRequest(req));
+  try {
+    const fixed = fixRequest(req);
+    return await handlers.GET(fixed);
+  } catch (err) {
+    console.error("[NextAuth GET Handler Exception]:", err);
+    throw err;
+  }
 }
 
 export async function POST(req: NextRequest) {
-  return handlers.POST(fixRequest(req));
+  try {
+    const fixed = fixRequest(req);
+    return await handlers.POST(fixed);
+  } catch (err) {
+    console.error("[NextAuth POST Handler Exception]:", err);
+    throw err;
+  }
 }
+
 
