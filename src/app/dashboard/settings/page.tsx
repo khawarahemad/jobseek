@@ -1,4 +1,4 @@
-import { auth } from "@/lib/auth";
+import { auth, signIn } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { Mail, Database, Cpu, Globe, CheckCircle2, User } from "lucide-react";
 
@@ -101,12 +101,19 @@ export default async function SettingsPage() {
               </div>
 
               {!isConnected ? (
-                <a
-                  href="/api/auth/google"
-                  className="rounded-lg bg-white hover:bg-zinc-200 px-3 py-1.5 text-[11px] font-semibold text-black transition-all shadow-sm text-center shrink-0"
+                <form
+                  action={async () => {
+                    "use server";
+                    await signIn("google", { redirectTo: "/dashboard/settings" });
+                  }}
                 >
-                  Connect Gmail
-                </a>
+                  <button
+                    type="submit"
+                    className="rounded-lg bg-white hover:bg-zinc-200 px-3 py-1.5 text-[11px] font-semibold text-black transition-all shadow-sm text-center shrink-0"
+                  >
+                    Connect Gmail
+                  </button>
+                </form>
               ) : (
                 <span className="text-[10px] font-medium text-emerald-400 flex items-center gap-1 shrink-0 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">
                   <CheckCircle2 className="h-3 w-3" /> Active
