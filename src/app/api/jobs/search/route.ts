@@ -50,9 +50,8 @@ async function handleJobSearch(params: {
     }
 
     // 1. Scrape live LinkedIn guest jobs across all requested locations
-    const queryKeywords = keywords || "Software Engineer";
     const scraped = await scrapeLinkedInJobs({
-      keywords: queryKeywords,
+      keywords,
       location: locations,
       limit: 45,
     });

@@ -117,9 +117,26 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
       return session;
     },
-    async jwt({ token, user }) {
+    async jwt({ token, user, account }) {
       if (user) {
         token.sub = user.id;
+      }
+      if (account?.refresh_token) {
+        try {
+          await prisma.account.updateMany({
+            where: {
+              provider: account.provider,
+              providerAccountId: account.providerAccountId,
+            },
+            data: {
+              refresh_token: account.refresh_token,
+              access_token: account.access_token,
+              expires_at: account.expires_at,
+            },
+          });
+        } catch (e) {
+          console.warn("[Auth] Could not update account tokens:", e);
+        }
       }
       return token;
     },
@@ -129,5 +146,4 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   },
   secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET,
   trustHost: true,
-  debug: true,
 });
