@@ -20,6 +20,8 @@ model User {
   jobs             Job[]
   templates        Template[]
   candidateProfile CandidateProfile?
+  aiMessages       AiChatMessage[]
+  aiSessions       AiChatSession[]
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
 }
@@ -147,4 +149,33 @@ model OutreachLog {
   sentAt       DateTime @default(now())
 
   job Job @relation(fields: [jobId], references: [id], onDelete: Cascade)
+}
+
+model AiChatSession {
+  id        String          @id @default(cuid())
+  userId    String
+  title     String          @default("New Conversation")
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+
+  user      User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages  AiChatMessage[]
+
+  @@index([userId, updatedAt])
+}
+
+model AiChatMessage {
+  id            String         @id @default(cuid())
+  userId        String
+  sessionId     String?
+  role          String         // "user" | "assistant" | "system"
+  content       String         @db.Text
+  actionPayload Json?          // Proposed action, data, approval status: "PENDING" | "APPROVED" | "EXECUTED" | "DISMISSED"
+  createdAt     DateTime       @default(now())
+
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  session       AiChatSession? @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([sessionId, createdAt])
 }

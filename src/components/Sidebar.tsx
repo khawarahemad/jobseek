@@ -12,6 +12,7 @@ import {
   ExternalLink,
   FileText,
   Globe,
+  Sparkles,
 } from "lucide-react";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
@@ -35,6 +36,7 @@ export default function Sidebar({ user, isConnected = false }: SidebarProps) {
 
   const routes = [
     { name: "Overview", icon: LayoutDashboard, path: "/dashboard" },
+    { name: "AI Copilot", icon: Sparkles, path: "/dashboard/ai-chat", highlight: true },
     { name: "Find Jobs", icon: Globe, path: "/dashboard/search" },
     { name: "Pipeline", icon: Briefcase, path: "/dashboard/pipeline" },
     { name: "AI Resume", icon: FileText, path: "/dashboard/profile" },
@@ -87,7 +89,12 @@ export default function Sidebar({ user, isConnected = false }: SidebarProps) {
                     isActive ? "text-indigo-400" : "text-zinc-500"
                   )}
                 />
-                <span className="truncate">{route.name}</span>
+                <span className="truncate flex-1">{route.name}</span>
+                {route.highlight && (
+                  <span className="text-[8px] font-mono uppercase px-1 py-0.2 rounded bg-indigo-500/20 text-indigo-300 font-bold border border-indigo-500/30">
+                    AI
+                  </span>
+                )}
               </Link>
             );
           })}

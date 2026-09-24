@@ -205,24 +205,35 @@ async function logSentOutreach(
   messageId?: string,
   threadId?: string
 ) {
-  await prisma.$transaction([
-    prisma.outreachLog.create({
-      data: {
-        jobId,
-        threadId,
-        messageId,
-        sentTo: to,
-        subject,
-        bodySnippet: body.slice(0, 300),
-      },
-    }),
-    prisma.job.update({
+  try {
+    const jobExists = await prisma.job.findUnique({
       where: { id: jobId },
-      data: {
-        status: "EMAILED",
-        generatedSubject: subject,
-        generatedBody: body,
-      },
-    }),
-  ]);
+      select: { id: true },
+    });
+
+    if (jobExists) {
+      await prisma.$transaction([
+        prisma.outreachLog.create({
+          data: {
+            jobId,
+            threadId,
+            messageId,
+            sentTo: to,
+            subject,
+            bodySnippet: body.slice(0, 300),
+          },
+        }),
+        prisma.job.update({
+          where: { id: jobId },
+          data: {
+            status: "EMAILED",
+            generatedSubject: subject,
+            generatedBody: body,
+          },
+        }),
+      ]);
+    }
+  } catch (err) {
+    console.warn("[logSentOutreach] Notice:", err);
+  }
 }

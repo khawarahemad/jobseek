@@ -4,13 +4,34 @@ const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
-export const prisma =
-  globalForPrisma.prisma ??
-  new PrismaClient({
+function initPrismaClient(): PrismaClient {
+  return new PrismaClient({
     log: process.env.NODE_ENV === 'development' ? ['warn', 'error'] : ['error'],
   });
+}
 
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
+// Proxy wrapper ensures that if new models (e.g. aiChatMessage, aiChatSession) are accessed,
+// it auto-reconnects to a fresh PrismaClient if the cached client is stale.
+export const prisma = new Proxy({} as PrismaClient, {
+  get(target, prop, receiver) {
+    if (
+      !globalForPrisma.prisma ||
+      (typeof prop === 'string' && !prop.startsWith('$') && !prop.startsWith('_') && !(globalForPrisma.prisma as any)[prop])
+    ) {
+      globalForPrisma.prisma = initPrismaClient();
+    }
+    const instance = globalForPrisma.prisma as any;
+    const value = instance[prop];
+    if (typeof value === 'function') {
+      return value.bind(instance);
+    }
+    return value;
+  },
+});
+
+if (process.env.NODE_ENV !== 'production' && !globalForPrisma.prisma) {
+  globalForPrisma.prisma = initPrismaClient();
+}
 
 /**
  * Executes a Prisma query with automatic retry on transient connection drops
@@ -45,4 +66,3 @@ export async function withDbRetry<T>(
   }
   throw lastError;
 }
-
